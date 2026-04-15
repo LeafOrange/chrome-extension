@@ -1,0 +1,139 @@
+// ==UserScript==
+// @name         B站视频截图下载器
+// @namespace    http://tampermonkey.net/
+// @version      1.1
+// @description  在B站视频暂停时下载当前帧图片
+// @author       LeafOrange
+// @match        https://www.bilibili.com/video/*
+// @match        https://www.bilibili.com/bangumi/play/*
+// @grant        none
+// @run-at       document-end
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    console.log('[B站截图器] 脚本开始加载...');
+
+    let screenshotBtn = null;
+
+    // 创建截图按钮
+    function createScreenshotButton() {
+        if (screenshotBtn) screenshotBtn.remove();
+
+        const btn = document.createElement('button');
+        btn.id = 'bilibili-screenshot-btn';
+        btn.innerHTML = '📸 截图';
+        btn.style.cssText = `
+            position: fixed !important;
+            top: 100px !important;
+            right: 20px !important;
+            z-index: 2147483647 !important;
+            background: #00a1d6 !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 18px !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            font-size: 14px !important;
+            font-weight: bold !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+            transition: all 0.3s !important;
+        `;
+
+        btn.addEventListener('mouseenter', () => {
+            btn.style.background = '#00b5e5';
+            btn.style.transform = 'scale(1.05)';
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.background = '#00a1d6';
+            btn.style.transform = 'scale(1)';
+        });
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            takeScreenshot();
+        });
+
+        document.body.appendChild(btn);
+        console.log('[B站截图器] 按钮已创建');
+    }
+
+    function takeScreenshot() {
+        let video = document.querySelector('video');
+
+        // 尝试在B站播放器容器里找
+        if (!video) {
+            video = document.querySelector('.bilibili-player-video video, .bpx-player-video-wrap video');
+        }
+
+        if (!video) {
+            alert('未找到视频元素，请确保视频正在播放');
+            return;
+        }
+
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || video.clientWidth;
+            canvas.height = video.videoHeight || video.clientHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const titleEl = document.querySelector('h1.video-title, .media-title');
+            const title = titleEl?.textContent?.trim() || 'bilibili';
+            const time = formatTime(video.currentTime);
+            const filename = `${title}_${time}.png`.replace(/[\\/:*?"<>|]/g, '_').substring(0, 100);
+
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        } catch (err) {
+            alert('截图失败: ' + err.message);
+        }
+    }
+
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        const ms = Math.floor((seconds % 1) * 1000);
+        if (h > 0) return `${h}h${String(m).padStart(2,'0')}m${String(s).padStart(2,'0')}s`;
+        return `${m}m${String(s).padStart(2,'0')}s${String(ms).padStart(3,'0')}ms`;
+    }
+
+    function handleKeydown(e) {
+        if ((e.shiftKey && e.key === 'S') || (e.altKey && e.key === 's')) {
+            e.preventDefault();
+            e.stopPropagation();
+            takeScreenshot();
+        }
+    }
+
+    function init() {
+        document.removeEventListener('keydown', handleKeydown);
+        document.addEventListener('keydown', handleKeydown, true);
+        createScreenshotButton();
+
+        // 监听B站页面切换（SPA）
+        let lastUrl = location.href;
+        new MutationObserver(() => {
+            if (location.href !== lastUrl) {
+                lastUrl = location.href;
+                setTimeout(init, 1000);
+            }
+        }).observe(document, { subtree: true, childList: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 1500));
+    } else {
+        setTimeout(init, 1500);
+    }
+})();
