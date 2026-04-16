@@ -1,0 +1,16 @@
+{
+  "name": "ocr-extension-mvp",
+  "version": "1.0.0",
+  "description": "Chrome extension for offline OCR with PaddleOCR PP-OCRv4",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "onnxruntime-web": "^1.21.0"
+  }
+}

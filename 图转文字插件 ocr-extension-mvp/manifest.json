@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "图转文字 OCR",
+  "version": "0.3.0",
+  "description": "Chrome extension for screenshot-to-text with a floating launcher and offline PaddleOCR (PP-OCRv4) pipeline.",
+  "minimum_chrome_version": "109",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "clipboardWrite",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "action": {
+    "default_title": "图转文字 OCR",
+    "default_popup": "src/popup/popup.html"
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "src/content/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "capture-visible": {
+      "description": "直接执行可视区截图并识别"
+    },
+    "capture-selection": {
+      "suggested_key": {
+        "default": "Alt+S"
+      },
+      "description": "选区截图识别"
+    },
+    "capture-fullpage": {
+      "description": "整页长图截图识别"
+    },
+    "toggle-launcher": {
+      "description": "显示或隐藏图转文字悬浮入口"
+    },
+    "show-latest": {
+      "description": "打开最近结果"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "node_modules/onnxruntime-web/dist/*",
+        "models/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

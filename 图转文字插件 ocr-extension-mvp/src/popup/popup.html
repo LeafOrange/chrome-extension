@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>图转文字 OCR - 设置</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 340px; min-height: 420px;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #0f172a; color: #e2e8f0; padding: 20px;
+      font-size: 13px; line-height: 1.6;
+    }
+    h1 { font-size: 18px; margin-bottom: 4px; color: #f1f5f9; }
+    .subtitle { font-size: 12px; color: #64748b; margin-bottom: 16px; }
+    .section { margin-bottom: 16px; }
+    .section-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      color: #64748b; letter-spacing: 0.06em; margin-bottom: 8px;
+    }
+    .row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .row:last-child { border-bottom: none; }
+    .row label { flex: 1; }
+    select, button {
+      background: rgba(255,255,255,0.08); color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+      padding: 6px 10px; font: inherit; cursor: pointer;
+    }
+    select:hover, button:hover { border-color: rgba(96,165,250,0.5); }
+    button.danger { border-color: rgba(220,38,38,0.4); color: #fca5a5; }
+    button.danger:hover { background: rgba(220,38,38,0.15); }
+    .toggle {
+      position: relative; width: 40px; height: 22px;
+      background: rgba(255,255,255,0.12); border-radius: 11px; cursor: pointer;
+    }
+    .toggle.on { background: #2563eb; }
+    .toggle::after {
+      content: ""; position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #e2e8f0; transition: transform 0.15s ease;
+    }
+    .toggle.on::after { transform: translateX(18px); }
+    .kbd {
+      display: inline-block; padding: 2px 6px; border-radius: 4px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      font-size: 11px; font-family: monospace; color: #93c5fd;
+    }
+    .shortcuts { display: grid; gap: 6px; }
+    .shortcut-row { display: flex; justify-content: space-between; }
+    .info { font-size: 11px; color: #64748b; margin-top: 8px; }
+    .stat { color: #93c5fd; font-weight: 600; }
+    .privacy {
+      margin-top: 12px; padding: 10px; border-radius: 10px;
+      background: rgba(255,255,255,0.03); font-size: 11px; color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <h1>图转文字 OCR</h1>
+  <div class="subtitle">本地离线文字识别 · PaddleOCR PP-OCRv4</div>
+
+  <div class="section">
+    <div class="section-title">快捷键</div>
+    <div class="shortcuts" id="shortcutsList">
+      <!-- Dynamically populated by popup.js -->
+    </div>
+    <div class="info" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+      <span>在 Chrome 设置中自定义快捷键</span>
+      <button id="openShortcutsBtn" style="padding:4px 10px; font-size:11px;">前往设置</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">设置</div>
+    <div class="row">
+      <label>显示悬浮图标</label>
+      <div class="toggle" id="toggleLauncher"></div>
+    </div>
+    <div class="row">
+      <label>识别后自动复制</label>
+      <div class="toggle" id="toggleAutoCopy"></div>
+    </div>
+    <div class="row">
+      <label>默认截图模式</label>
+      <select id="defaultMode">
+        <option value="visible">可视区截图</option>
+        <option value="selection">选区截图</option>
+        <option value="fullpage">整页截图</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">数据</div>
+    <div class="row">
+      <label>历史记录: <span class="stat" id="historyCount">0</span> 条</label>
+    </div>
+    <div class="row">
+      <button class="danger" id="clearHistoryBtn">清空历史记录</button>
+      <button class="danger" id="clearCacheBtn" style="margin-left:8px;">清除OCR缓存</button>
+    </div>
+  </div>
+
+  <div class="privacy">
+    <strong>隐私声明:</strong> 所有图像处理和文字识别均在本地浏览器中完成，不会向任何服务器上传截图或识别内容。
+    OCR 引擎 (PaddleOCR PP-OCRv4) 完全运行在浏览器 Offscreen Document 中，通过 ONNX Runtime WASM 推理。模型数据已随扩展打包。
+  </div>
+
+  <div class="info" style="margin-top:12px; text-align:center;">
+    v0.3.0 · PaddleOCR PP-OCRv4 · 中英文离线识别
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
